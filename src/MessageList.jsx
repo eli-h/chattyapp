@@ -11,7 +11,8 @@ class MessageList extends Component {
 		  <Message 
         key={index} 
         userName={message.username} 
-        userContent={message.content}/>
+        userContent={message.content}
+        type={message.type}/>
 		))
 
     console.log('Rendering <MessageList/>');

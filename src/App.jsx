@@ -54,7 +54,7 @@ class App extends Component {
             messages: this.state.messages.concat({
               content: data.oldName + ' has changed their username to ' + data.newName,
               id: data.id,
-              username: ''
+              type: 'notification'
             })})
 	  	    break;
         case 'userCount':
@@ -70,7 +70,7 @@ class App extends Component {
   	console.log('Rendering <App/>');
     return (
     	<div>
-        <nav className="navbar"><div className="navbar-counter">Mans: {this.state.users}</div>
+        <nav className="navbar"><div className="navbar-counter">Users: {this.state.users}</div>
           <a href="/" className="navbar-brand">Chatty</a>
         </nav>
 	      <MessageList messages={this.state.messages}/>
