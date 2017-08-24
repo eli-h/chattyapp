@@ -6,14 +6,16 @@ class App extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-		currentUser: {name: "Anon"},
+		currentUser: {oldName: '',
+      newName: "Anon"
+    },
     messages: []
 	  };
 	}
   createMessage(e){
     if (e.key === 'Enter') {
     	const message = {
-  		  username: this.state.currentUser.name,
+  		  username: this.state.currentUser.newName,
         content: e.target.value,
         type: 'postMessage'
   	};
@@ -25,11 +27,12 @@ class App extends Component {
   updateUserName(e){
   	if (e.key === 'Enter') {
   		const userName = {
-        oldName: this.state.currentUser.name,
+        oldName: this.state.currentUser.newName,
   		  newName: e.target.value,
   		  type: 'postNotification' 	
   		}
       e.target.value = ''
+      console.log(userName)
       this.socket.send(JSON.stringify(userName))
     }
   }
@@ -43,13 +46,21 @@ class App extends Component {
 	  	const data = JSON.parse(e.data);
 	  	switch(data.type){
 	  		case 'incomingMessage':
-          console.log(data)
-	  	    this.setState({messages: this.state.messages.concat(data)})
+          let newMessage = this.state.messages.concat(data);
+	  	    this.setState({messages: newMessage})
 	  	    break;
 	  	  case 'incomingNotification':
-          console.log(data)
-          this.setState({currentUser: {name: data.newName}})
+          this.setState({currentUser: {oldName: data.oldName, newName: data.newName}})
+          this.setState({
+            messages: this.state.messages.concat({
+              content: data.oldName + ' has changed their username to ' + data.newName,
+              id: data.id,
+              username: ''
+            })})
 	  	    break;
+        case 'userCount':
+          this.setState({users: data.users});
+          break;
 	  	  default:
 	  	    throw new Error("Unknown event type " + data.type);
 	  	}
@@ -60,8 +71,11 @@ class App extends Component {
   	console.log('Rendering <App/>');
     return (
     	<div>
+        <nav className="navbar"><div className="navbar-counter">Mans: {this.state.users}</div>
+          <a href="/" className="navbar-brand">Chatty</a>
+        </nav>
 	      <MessageList messages={this.state.messages}/>
-	      <ChatBar currentUser={this.state.currentUser} updateUserName={this.updateUserName.bind(this)}  createMessage={this.createMessage.bind(this)}/>
+	      <ChatBar currentUser={this.state.currentUser.newName} updateUserName={this.updateUserName.bind(this)}  createMessage={this.createMessage.bind(this)}/>
 	    </div>
     );
   }
