@@ -9,7 +9,7 @@ With this app, people can:
 - post messages for everyone to see
 - change their name, which will notify everyone connected
 ```
-![Chatty App Screenshot](./docs/chattyApp.png)
+![Chatty App Screenshot](https://github.com/eli-h/chattyapp/blob/master/docs/chattyApp.png?raw=true)
 
 ### Dependencies
 
