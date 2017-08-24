@@ -34,8 +34,6 @@ wss.on('connection', (ws) => {
     type: 'userCount'
   }
   wss.broadcast(userCount);
-  console.log(userCount)
-
 
   ws.on('message', (data) => {
     dataJSON = JSON.parse(data);
@@ -43,7 +41,6 @@ wss.on('connection', (ws) => {
 
     switch(dataJSON.type){
       case 'postMessage':
-        console.log(dataJSON)
         let newMessage = {
           type: 'incomingMessage',
           username: dataJSON.username,

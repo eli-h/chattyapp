@@ -32,7 +32,6 @@ class App extends Component {
   		  type: 'postNotification' 	
   		}
       e.target.value = ''
-      console.log(userName)
       this.socket.send(JSON.stringify(userName))
     }
   }
