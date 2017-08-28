@@ -47,6 +47,7 @@ wss.on('connection', (ws) => {
           content: dataJSON.content,
           id: dataJSON.id
         }
+        ws.name = dataJSON.username;
         wss.broadcast(newMessage);
         break;
       case 'postNotification':
@@ -56,9 +57,13 @@ wss.on('connection', (ws) => {
           newName: dataJSON.newName,
           id: dataJSON.id
         }
+        ws.name = dataJSON.username;
         wss.broadcast(newUsername);
     }
   })
   // Set up a callback for when a client closes the socket. This usually means they closed their browser. 
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    users--;
+    console.log('Client disconnected')
+  });
 });
