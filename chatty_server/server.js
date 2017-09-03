@@ -37,29 +37,39 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (data) => {
     dataJSON = JSON.parse(data);
-    dataJSON.id = uuid();
 
     switch(dataJSON.type){
       case 'postMessage':
-        let newMessage = {
-          type: 'incomingMessage',
-          username: dataJSON.username,
-          content: dataJSON.content,
-          id: dataJSON.id
-        }
-        ws.name = dataJSON.username;
-        wss.broadcast(newMessage);
+        // ws.name = dataJSON.username;
+        broadcastMessage(newMessage(dataJSON));
         break;
       case 'postNotification':
-        let newUsername = {
-          type: 'incomingNotification',
-          oldName: dataJSON.oldName,
-          newName: dataJSON.newName,
-          id: dataJSON.id
-        }
-        ws.name = dataJSON.username;
-        wss.broadcast(newUsername);
+        // ws.name = dataJSON.username;
+        broadcastMessage(postNotification(dataJSON));
     }
+
+    function newMessage(message){
+      let newMessage = {
+        type: 'incomingMessage',
+        data: {
+          username: message.data.username,
+          content: message.data.content,
+          id: uuid()
+        }
+      }
+      return newMessage
+    }
+
+    function postNotification(message){
+      let newUsername = {
+        type: 'incomingNotification',
+        data: {
+          content: message.data.oldName + " has changed their name to " + message.data.newName
+        }
+      }
+      return newUsername
+    }
+
   })
   // Set up a callback for when a client closes the socket. This usually means they closed their browser. 
   ws.on('close', () => {
@@ -67,3 +77,11 @@ wss.on('connection', (ws) => {
     console.log('Client disconnected')
   });
 });
+
+broadcastMessage = (message) => {
+    wss.clients.forEach((client) => {
+        if (client.readyState === require('ws').OPEN) {
+            client.send(JSON.stringify(message));
+        }
+    });
+};

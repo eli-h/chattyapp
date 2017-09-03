@@ -6,18 +6,18 @@ class App extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-		currentUser: {oldName: '',
-      newName: "Anon"
-    },
+		currentUser: {name: 'Anon'},
     messages: []
 	  };
 	}
   createMessage(e){
     if (e.key === 'Enter') {
     	const message = {
-  		  username: this.state.currentUser.newName,
-        content: e.target.value,
-        type: 'postMessage'
+  		  type: 'postMessage',
+        data: {
+          username: this.state.currentUser.name,
+          content: e.target.value
+        }
   	};
   	e.target.value = ''
   	this.socket.send(JSON.stringify(message))
@@ -25,14 +25,20 @@ class App extends Component {
   }
 
   updateUserName(e){
+    const currentUser = {
+      name: e.target.value
+    }
   	if (e.key === 'Enter') {
   		const userName = {
-        oldName: this.state.currentUser.newName,
-  		  newName: e.target.value,
-  		  type: 'postNotification' 	
+        type: 'postNotification',
+        data: {
+          oldName: this.state.currentUser.name,
+          newName: currentUser.name
+        } 	
   		}
       e.target.value = ''
       this.socket.send(JSON.stringify(userName))
+      this.setState({currentUser})
     }
   }
 
@@ -45,17 +51,12 @@ class App extends Component {
 	  	const data = JSON.parse(e.data);
 	  	switch(data.type){
 	  		case 'incomingMessage':
-          let newMessage = this.state.messages.concat(data);
+          let newMessage = [...this.state.messages, data.data]
 	  	    this.setState({messages: newMessage})
 	  	    break;
 	  	  case 'incomingNotification':
-          this.setState({currentUser: {oldName: data.oldName, newName: data.newName}})
-          this.setState({
-            messages: this.state.messages.concat({
-              content: data.oldName + ' has changed their username to ' + data.newName,
-              id: data.id,
-              type: 'notification'
-            })})
+          let newName = [... this.state.messages, data.data]
+          this.setState({ messages: newName});
 	  	    break;
         case 'userCount':
           this.setState({users: data.users});
@@ -74,7 +75,7 @@ class App extends Component {
           <a href="/" className="navbar-brand">Chatty</a>
         </nav>
 	      <MessageList messages={this.state.messages}/>
-	      <ChatBar currentUser={this.state.currentUser.newName} updateUserName={this.updateUserName.bind(this)}  createMessage={this.createMessage.bind(this)}/>
+	      <ChatBar currentUser={this.state.currentUser.name} updateUserName={this.updateUserName.bind(this)}  createMessage={this.createMessage.bind(this)}/>
 	    </div>
     );
   }
