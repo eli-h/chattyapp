@@ -16,39 +16,39 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
-wss.broadcast = (message) => {
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN){
-      client.send(JSON.stringify(message));
-    }
-  })
-}
-
 let users = 0
 
 wss.on('connection', (ws) => {
+
   console.log('Client Connected')
+
   users++;
+
   userCount = {
     users: users,
     type: 'userCount'
   }
-  wss.broadcast(userCount);
+
+  broadcastMessage(userCount);
 
   ws.on('message', (data) => {
     dataJSON = JSON.parse(data);
 
     switch(dataJSON.type){
+
       case 'postMessage':
         // ws.name = dataJSON.username;
         broadcastMessage(newMessage(dataJSON));
         break;
+
       case 'postNotification':
         // ws.name = dataJSON.username;
         broadcastMessage(postNotification(dataJSON));
+        break;
     }
 
     function newMessage(message){
+
       let newMessage = {
         type: 'incomingMessage',
         data: {
@@ -57,31 +57,40 @@ wss.on('connection', (ws) => {
           id: uuid()
         }
       }
+
       return newMessage
+
     }
 
     function postNotification(message){
+
       let newUsername = {
         type: 'incomingNotification',
         data: {
           content: message.data.oldName + " has changed their name to " + message.data.newName
         }
       }
+
       return newUsername
+
     }
 
   })
   // Set up a callback for when a client closes the socket. This usually means they closed their browser. 
   ws.on('close', () => {
+
     users--;
     console.log('Client disconnected')
+
   });
 });
 
 broadcastMessage = (message) => {
+
     wss.clients.forEach((client) => {
         if (client.readyState === require('ws').OPEN) {
             client.send(JSON.stringify(message));
         }
     });
+    
 };
